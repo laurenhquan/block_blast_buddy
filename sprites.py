@@ -15,15 +15,13 @@ class GridBlock(pygame.sprite.Sprite):
             selected_pos = pygame.mouse.get_pos()
             if self.rect.left < selected_pos[0] < self.rect.right and self.rect.top < selected_pos[1] < self.rect.bottom:
                 self.image.fill('blue')
+                # set grid_data pos to 1
 
         if mouse[2]:
             selected_pos = pygame.mouse.get_pos()
             if self.rect.left < selected_pos[0] < self.rect.right and self.rect.top < selected_pos[1] < self.rect.bottom:
                 self.image.fill('grey')
-
-
-    def deselect_block(self):
-        pass
+                # set grid_data pos back to 0
 
     def update(self):
         self.select_block()
