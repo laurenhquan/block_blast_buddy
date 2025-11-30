@@ -1,18 +1,66 @@
 import pygame
+from sprites import *
 
-# initialize game
-pygame.init()
+SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 
-# set up game window
-screen = pygame.display.set_mode((400, 300))
-pygame.display.set_caption("Block Blast Buddy")
+class Game:
+    def __init__(self):
+        # initialize game
+        pygame.init()
 
-# loop game
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type ==pygame.QUIT:
-            running = False
+        # set up game window
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Block Blast Buddy")
 
-# quit game
-pygame.quit()
+        # loop game
+        self.running = True
+
+        # set up groups
+        self.all_sprites = pygame.sprite.Group()
+
+        # load
+        self.grid()
+
+    def grid(self):
+        # initial pos
+        x, y = 0, 0
+
+        # 8x8 block blast grid
+        grid_data = [[0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0]]
+        
+        for row in grid_data:
+            for col in row:
+                if col == 0:
+                    GridBlock((x, y), self.all_sprites)
+                x += 46
+            x = 0
+            y += 46
+        
+    def run(self):
+        while self.running:
+            for event in pygame.event.get():
+                if event.type ==pygame.QUIT:
+                    self.running = False
+            
+            # update
+            self.all_sprites.update()
+
+            # draw
+            self.screen.fill("white")
+            self.all_sprites.draw(self.screen)
+
+            pygame.display.flip()
+
+        # quit game
+        pygame.quit()
+
+if __name__ == "__main__":
+    game = Game()
+    game.run()
