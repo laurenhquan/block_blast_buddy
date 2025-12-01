@@ -1,3 +1,6 @@
+# main.py
+# controls of program
+
 import tkinter as tk
 from grid import GridBlock
 

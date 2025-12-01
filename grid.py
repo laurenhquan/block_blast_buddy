@@ -1,3 +1,6 @@
+# grid.py
+# accesses grid by block
+
 class GridBlock:
     def __init__(self, canvas, x, y, size):
         # initialize grid
