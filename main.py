@@ -1,66 +1,68 @@
-import pygame
-from sprites import *
+import tkinter as tk
+from grid import GridBlock
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
+# screen size
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+
+# grid size
+GRID_ROWS = 8
+GRID_COLS = 8
+
+# block size
+BLOCK_SIZE = 45
+# BLOCK_GAP = 1
 
 class Game:
-    def __init__(self):
-        # initialize game
-        pygame.init()
+    def __init__(self, root):
+        # initialize window
+        self.root = root
+        self.root.title("Block Blast Buddy")
 
-        # set up game window
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Block Blast Buddy")
+        # load canvas
+        self.canvas = tk.Canvas(root, width=SCREEN_WIDTH, height=SCREEN_HEIGHT, bg="white")
+        self.canvas.pack()
 
-        # loop game
-        self.running = True
+        # load grid
+        self.grid_data = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
+        self.blocks = []
+        self.create_grid()
 
-        # set up groups
-        self.all_sprites = pygame.sprite.Group()
+        # mouse controls
+        self.canvas.bind("<Button-1>", self.left_click)
+        self.canvas.bind("<Button-3>", self.right_click)
 
-        # load
-        self.grid()
+    def create_grid(self):
+        for row in range(GRID_ROWS):
+            row_list = []
 
-    def grid(self):
-        # initial pos
-        x, y = 0, 0
+            for col in range(GRID_COLS):
+                x = col * (BLOCK_SIZE)
+                y = row * (BLOCK_SIZE)
+                block = GridBlock(self.canvas, x, y, BLOCK_SIZE)
+                row_list.append(block)
 
-        # 8x8 block blast grid
-        grid_data = [[0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0],
-                     [0,0,0,0,0,0,0,0]]
-        
-        for row in grid_data:
-            for col in row:
-                if col == 0:
-                    GridBlock((x, y), self.all_sprites)
-                x += 46
-            x = 0
-            y += 46
-        
-    def run(self):
-        while self.running:
-            for event in pygame.event.get():
-                if event.type ==pygame.QUIT:
-                    self.running = False
-            
-            # update
-            self.all_sprites.update()
+            self.blocks.append(row_list)
 
-            # draw
-            self.screen.fill("white")
-            self.all_sprites.draw(self.screen)
+    # select block
+    def left_click(self, event):
+        self.handle_click(event.x, event.y, fill_color="blue", set_value=1)
+    
+    # deselect block
+    def right_click(self, event):
+        self.handle_click(event.x, event.y, fill_color="gray", set_value=0)
 
-            pygame.display.flip()
+    def handle_click(self, x, y, fill_color, set_value):
+        for row in range(GRID_ROWS):
+            for col in range(GRID_COLS):
+                block = self.blocks[row][col]
 
-        # quit game
-        pygame.quit()
+                if block.isWithinBounds(x,y):
+                    block.set_color(fill_color)
+                    self.grid_data[row][col] = set_value # 1=occupied, 0=vacant
+                    return
 
 if __name__ == "__main__":
-    game = Game()
-    game.run()
+    root = tk.Tk()
+    game = Game(root)
+    root.mainloop()
