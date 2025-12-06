@@ -35,7 +35,7 @@ class Game:
         grid_frame.pack(expand=True)
 
         # label grid
-        grid_label = tk.Label(grid_frame, text="Your Grid")
+        grid_label = tk.Label(grid_frame, text="Your Grid", font=("Helvetica", 12, "bold", "underline"))
         grid_label.pack()
 
         # load grid canvas
@@ -52,18 +52,49 @@ class Game:
         self.grid_canvas.bind("<Button-3>", lambda event: self.right_click(event, self.grid_data, self.grid_blocks, GRID_ROWS, GRID_COLS))
         # ---------------------------------------------------------------------------------------------------
 
+        # MARK: GRID KEY ------------------------------------------------------------------------------------
+        key_frame = tk.Frame(grid_frame)
+        key_frame.pack()
+
+        # TODO: change label names
+        key_items = {
+            "Empty": "gray",
+            "Occupied": "blue",
+            "Placed": "red"
+        }
+
+        for i, (label, color) in enumerate(key_items.items()):
+            color_box = tk.Canvas(key_frame, width=BLOCK_SIZE/2, height=BLOCK_SIZE/2, bg=color)
+            color_box.grid(row=0, column=(i*2))
+
+            label_name = tk.Label(key_frame, text=label)
+            label_name.grid(row=0, column=(i*2 + 1))
+        # ---------------------------------------------------------------------------------------------------
+
         # MARK: PIECES --------------------------------------------------------------------------------------
         # initiliaze piece frame
-        piece_frame = tk.Frame(self.root)
-        piece_frame.pack(expand=True)
+        pieces_frame = tk.Frame(self.root)
+        pieces_frame.pack(expand=True)
 
         # label pieces
-        piece_label = tk.Label(piece_frame, text="Your Pieces")
+        piece_label = tk.Label(pieces_frame, text="Your Pieces", font=("Helvetica", 12, "bold", "underline"))
         piece_label.pack()
 
         # load pieces
         for i in range(PIECE_NUM):
-            self.load_pieces(i)
+            self.load_pieces(i, pieces_frame)
+        # ---------------------------------------------------------------------------------------------------
+
+        # MARK: SUBMISSION ----------------------------------------------------------------------------------
+        # initialize submit frame
+        submit_frame = tk.Frame(self.root)
+        submit_frame.pack(expand=True)
+
+        # provide submit button
+        submit_btn = tk.Button(submit_frame, text="Generate moves")
+        # TODO: command=lambda: solve puzzle
+        # TODO: solve puzzle = change grid_data to show red blocks as solution
+        submit_btn.pack()
         # ---------------------------------------------------------------------------------------------------
 
     def create_grid(self):
@@ -78,9 +109,9 @@ class Game:
 
             self.grid_blocks.append(row_list)
 
-    def load_pieces(self, piece_number):
+    def load_pieces(self, piece_number, parent_frame):
         # initialize piece frame
-        piece_frame = tk.Frame(self.root)
+        piece_frame = tk.Frame(parent_frame)
         piece_frame.pack(side="left")
 
         # declare piece rows, cols
