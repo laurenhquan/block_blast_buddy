@@ -1,4 +1,5 @@
-
+# solve.py
+# implements ai search and decision-making
 
 class BoardState:
     lines_cleared: int

@@ -1,5 +1,5 @@
 # main.py
-# controls of program
+# controls program
 
 import tkinter as tk
 from grid import GridBlock
