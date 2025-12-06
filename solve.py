@@ -147,13 +147,15 @@ def dirty_solve_recursive(grid, remaining_pieces, moves_so_far, total_lines, tot
     rows = len(grid)
     cols = len(grid[0]) if rows > 0 else 0
     
-    for piece_idx, piece in enumerate(remaining_pieces):
+    for this_piece, piece in enumerate(remaining_pieces):
         for y in range(rows):
             for x in range(cols):
-                if grid[y][x] == 0 and does_piece_fit(grid, piece, (y, x)):
+                if grid[y][x] != 0:
+                    continue
+                if does_piece_fit(grid, piece, (y, x)):
                     new_grid, lines_cleared, space_cleared = update_board(grid, piece, (y, x))
                     cleaned_grid = clean_board(new_grid)
-                    other_pieces = remaining_pieces[:piece_idx] + remaining_pieces[piece_idx+1:]
+                    other_pieces = remaining_pieces[:this_piece] + remaining_pieces[this_piece+1:]
                     states_checked[0] += 1
                     
                     dirty_solve_recursive(
@@ -166,13 +168,37 @@ def dirty_solve_recursive(grid, remaining_pieces, moves_so_far, total_lines, tot
                         states_checked
                     )
 
-
+#solve with AI evaluation
 def evaluate_board_state(grid) -> BoardState:
     pass
 
 #return best move found
 def search_best_move(grid, pieces) -> tuple:
     pass
+
+def show_move_options(grid, pieces):
+    where = (0, -1)
+    num_options = 0
+
+    print("\n===== Initial Grid =====")
+    print_matrix("rows   ", "columns", grid)
+    
+    while where != (7, 7):
+        valid_moves, where = search_move(where, grid, pieces)
+
+        if valid_moves is not None:
+            for piece in valid_moves:
+                print(f"\n----------- Option {num_options + 1} -----------")
+                print(f"Piece {piece} fits at position {where}")
+                new_grid, lines_cleared, space_cleared = update_board(grid, piece, where)
+                print(f"Would clear: {lines_cleared} lines, {space_cleared} spaces")
+                print_matrix("rows   ", "columns", new_grid)
+                num_options += 1
+        else:
+            break
+    
+    print(f"\n{num_options} total valid placements found.")
+    print("(This only shows first-move options, not solutions)")
 
 def print_matrix(one, two, dist):
     cols = len(dist[0])
@@ -203,29 +229,16 @@ def main():
         [(0,0), (1,0), (2,0), (3,0)],  #line
         [(0,0), (0,1), (0,2), (1,2)],  #L shape
     ]
-    where = (0,-1)
-    num_moves = 0
+    
+    print("\n===== Showing Move Options =====")
+    show_move_options(grid, pieces)
 
-    print_matrix("rows   ", "columns", grid)
-
-    while where != (7,7):
-        valid_moves, where = search_move(where, grid, pieces)
-
-        if valid_moves is not None:
-            for piece in valid_moves:
-                print(f"\n---------------{len(valid_moves)}------------")
-                print(f"Found valid move at {where} for piece {piece}")
-                new_grid, lines_cleared, space_cleared = update_board(grid, piece, where)
-                print(f"Lines cleared: {lines_cleared}, Space cleared: {space_cleared}")
-                print_matrix("rows   ", "columns", new_grid)
-            num_moves += len(valid_moves)
-        else:
-            print(f"\nSearch complete, {num_moves} valid moves found.")
-
+    
+    print("\n===== Searching all states for best possible result =====")
+    print("Current best -> Lines cleared: 0, Space cleared: 0")
     result = dirty_solve(grid, pieces)
-    print("\n===== Dirty Solve Result =====")
     print(f"States checked: {result[1]}")
-    print(f"\nLines cleared: {result[0]['lines_cleared']}, Space cleared: {result[0]['space_cleared']}")
+    print(f"\nFinal Solution-> Lines cleared: {result[0]['lines_cleared']}, Spaces cleared: {result[0]['space_cleared']}")
     moves_str = '\n  '.join(f"{i+1}. {piece} at {pos}" 
                         for i, (piece, pos) in enumerate(result[0]['moves']))
     print(f"\n{len(result[0]['moves'])} Moves made:\n  {moves_str}")
