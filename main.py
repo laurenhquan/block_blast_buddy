@@ -79,51 +79,50 @@ class Game:
             self.grid_blocks.append(row_list)
 
     def load_pieces(self, piece_number):
-        # initialize piece 3 frame
+        # initialize piece frame
         piece_frame = tk.Frame(self.root)
         piece_frame.pack(side="left")
 
-        # declare piece 3 rows, cols
+        # declare piece rows, cols
         piece_rows_var = tk.IntVar()
         piece_cols_var = tk.IntVar()
 
-        # label piece 3
+        # label piece
         piece_label = tk.Label(piece_frame, text=f"Piece #{piece_number+1}")
         piece_label.grid(row=0, column=0, columnspan=5)
 
-        # label piece 3 rows
+        # label piece rows
         piece_rows_label = tk.Label(piece_frame, text="Rows:")
         piece_rows_label.grid(row=1, column=0)
 
-        # get piece 3 rows
+        # get piece rows
         piece_rows = tk.Entry(piece_frame, textvariable=piece_rows_var)
         piece_rows.grid(row=1, column=1)
 
-        # label piece 3 cols
+        # label piece cols
         piece_cols_label = tk.Label(piece_frame, text="Columns:")
         piece_cols_label.grid(row=1, column=2)
 
-        # get piece 3 cols
+        # get piece cols
         piece_cols = tk.Entry(piece_frame, textvariable=piece_cols_var)
         piece_cols.grid(row=1, column=3)
 
-        # submit piece 3 rows, cols
+        # submit piece rows, cols
         piece_submit = tk.Button(piece_frame, text="Submit", command=lambda: self.create_piece(piece_canvas, piece_blocks, piece_rows_var.get(), piece_cols_var.get()))
         piece_submit.grid(row=1, column=4)
 
-        # load piece 3 canvas
+        # load piece canvas
         piece_canvas = tk.Canvas(piece_frame, width=(piece_rows_var.get() * BLOCK_SIZE), height=(piece_cols_var.get() * BLOCK_SIZE), bg="white")
         piece_canvas.grid(row=4, column=0, columnspan=5)
 
-        # load piece 3
-        piece_data = [[0 for _ in range(piece_cols_var.get())] for _ in range(piece_rows_var.get())]
+        # initialize block list
         piece_blocks = []
-
-        # bind mouse controls
-        piece_canvas.bind("<Button-1>", lambda event: self.left_click(event, piece_data, piece_blocks, piece_rows_var.get(), piece_cols_var.get()))
-        piece_canvas.bind("<Button-3>", lambda event: self.right_click(event, piece_data, piece_blocks, piece_rows_var.get(), piece_cols_var.get()))
     
     def create_piece(self, canvas, blocks, rows, cols):
+        # ignore invalid inputs
+        if rows <= 0 or cols <= 0:
+            return
+
         canvas.config(width=cols*BLOCK_SIZE, height=rows*BLOCK_SIZE)
         blocks.clear()
 
@@ -137,6 +136,12 @@ class Game:
                 row_list.append(block)
 
             blocks.append(row_list)
+
+        piece_data = [[0 for _ in range(cols)] for _ in range(rows)]
+
+        # bind mouse controls
+        canvas.bind("<Button-1>", lambda event: self.left_click(event, piece_data, blocks, rows, cols))
+        canvas.bind("<Button-3>", lambda event: self.right_click(event, piece_data, blocks, rows, cols))
 
     # select block
     def left_click(self, event, data, blocks, rows, cols):
