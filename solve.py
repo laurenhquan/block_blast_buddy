@@ -2,9 +2,9 @@
 
 class BoardState:
     lines_cleared: int
-    freed_space: int   #diff placements could clear same amt of lines but free different amt of space
-    holes_created: int #don't want to create holes that can't be filled by other pieces
-    fragmentation: int  #how many different regions of empty space exist
+    space_cleared: int   #diff placements could clear same amt of lines but free different amt of space
+    holes_created: int   #don't want to create holes that can't be filled by other pieces
+    fragmentation: int   #how many different regions of empty space exist
     is_full_clear: bool
     is_game_over: bool
 
@@ -29,6 +29,7 @@ def does_piece_fit(grid, piece, pos):
         
     return True
 
+#place piece on board and return updated board, along with lines/space cleared
 def update_board(grid, piece, pos):
     rows = len(grid)
     cols = len(grid[0]) if rows > 0 else 0
