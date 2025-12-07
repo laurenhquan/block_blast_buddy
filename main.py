@@ -210,6 +210,17 @@ class Buddy:
         solution_window = tk.Toplevel(self.root)
         solution_window.title("Block Blast Buddy: Solved")
 
+        # grab solution from solve.py
+        self.solution = astar_solve(self.grid_data, self.pieces_data)
+
+        # MARK: GAME OVER -----------------------------------------------------------------------------------
+        if self.solution is None:
+            solution_window.title("Block Blast Buddy: UNSolved")
+            game_over_label = tk.Label(solution_window, text="GAME OVER!\nNo solution was found.", font=("Helvetica", 12, "bold", "underline"), fg="red")
+            game_over_label.pack()
+            return
+        # ---------------------------------------------------------------------------------------------------
+
         # MARK: SOLVED GRID ---------------------------------------------------------------------------------
         # initialize solution grid frame
         solution_grid_frame = tk.Frame(solution_window)
@@ -224,7 +235,6 @@ class Buddy:
         solution_grid_canvas.pack()
 
         # load solution grid
-        self.solution = astar_solve(self.grid_data, self.pieces_data)
         solution_grid_data = self.solution['grid']
         self.create_grid(solution_grid_canvas, solution_grid_data)
         # ---------------------------------------------------------------------------------------------------
