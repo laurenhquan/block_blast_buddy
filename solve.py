@@ -393,7 +393,7 @@ def astar_solve(grid, pieces_2d):
             
             for y in range(rows):
                 for x in range(cols):
-                    if grid_list[y][x] == 0 and does_piece_fit(grid_list, piece, (y, x)):
+                    if grid_list[y][x] <= 0 and does_piece_fit(grid_list, piece, (y, x)):
                         
                         states_explored += 1
 
