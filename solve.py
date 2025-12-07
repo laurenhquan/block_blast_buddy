@@ -343,12 +343,14 @@ def get_metrics(grid, piece, where):
 def astar_solve(grid, pieces_2d):
     pieces = convert_piece_format(pieces_2d)
 
+    init_grid, init_lines, init_space = clear_full_lines(grid)
+
     init_state = {
-        'grid': tuple(tuple(row) for row in grid),
+        'grid': tuple(tuple(row) for row in init_grid),
         'pieces_left': tuple(range(len(pieces))),
         'moves': (),
-        'lines': 0,
-        'spaces': 0,
+        'lines': init_lines,
+        'spaces': init_space,
         'depth': 0
     }
     
