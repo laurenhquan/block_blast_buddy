@@ -4,7 +4,9 @@
 - Standard library
 ## Run
 From the project directory:
-`python main.py`
+```bash
+python main.py
+```
 
 # Files
 ## main.py
