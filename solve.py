@@ -2,6 +2,7 @@
 # implements ai search and decision-making
 # https://docs.python.org/3/library/heapq.html
 import heapq
+import time
 
 class BoardState:
     lines_cleared: int
@@ -430,65 +431,140 @@ def astar_solve(grid, pieces_2d):
 
 
 def main():
-    grid = [
-        [0, 1, 0, 0, 1, 1, 1, 1],
-        [1, 1, 0, 0, 1, 1, 1, 1],
-        [0, 0, 1, 0, 1, 0, 1, 1],
-        [0, 1, 1, 0, 0, 0, 1, 1],
-        [0, 0, 1, 0, 1, 1, 1, 0],
-        [0, 0, 1, 1, 1, 0, 0, 0],
-        [0, 0, 1, 0, 1, 1, 1, 0],
-        [0, 1, 1, 0, 0, 0, 0, 1],
+    grid1 = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1, 1],
+        [0, 0, 1, 1, 1, 0, 1, 1],
+        [0, 0, 0, 0, 0, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 0],
     ]
-    pieces = [
-        [(0,0), (1,0), (0,1), (1,1)],  #square
-        [(0,0), (1,0), (2,0), (3,0)],  #line
-        [(0,0), (0,1), (0,2), (1,2)],  #L shape
+    pieces1 = [
+        [(0,0), (0,1), (1,1), (1,2)],
+        [(0,0), (0,1), (0,2), (1,2)],
+        [(0,0), (0,1), (0,2), (0,3)]
     ]
-    pieces_2d = {
+    pieces_2d1 = {
         0: [
-            [1, 1],
-            [1, 1]
+            [1, 1, 0],
+            [0, 1, 1]
         ],
         1: [
-            [1],
-            [1],
-            [1],
-            [1]
+            [1, 1, 1],
+            [0, 0, 1]
+        ],
+        2: [
+            [1, 1, 1, 1]
+        ]
+    }
+
+    # print(f"{find_fragmentation(grid)} fragments found in initial grid.")
+    
+
+    # print("\n===== Showing Move Options =====")
+    # show_move_options(grid, pieces)
+
+    
+    # print("\n===== Searching all states for best possible result =====")
+    # print("Current best -> Lines cleared: 0, Space cleared: 0")
+    start_time1 = time.time()
+    result = brute_force(grid1, pieces1)
+    end_time1 = time.time()
+    elapsed_time1 = end_time1 - start_time1
+    # print(f"States checked: {result[1]}")
+    # print(f"\nFinal Solution-> Lines cleared: {result[0]['lines_cleared']}, Spaces cleared: {result[0]['space_cleared']}")
+    # moves_str = '\n  '.join(f"{i+1}. {piece} at {pos}" 
+    #                     for i, (piece, pos) in enumerate(result[0]['moves']))
+    # print(f"\n{len(result[0]['moves'])} Moves made:\n  {moves_str}")
+    # print("\nFinal grid state:")
+    # print_matrix("rows   ", "columns", result[0]['grid'])
+
+    # print("\n===== Thinking about moves for best possible result =====")
+    # print(f"\nMove 1: {result[0]['moves'][0][0]} at {result[0]['moves'][0][1]}")
+    # get_metrics(grid, result[0]['moves'][0][0], result[0]['moves'][0][1])
+    # print(f"\nMove 2: {result[0]['moves'][1][0]} at {result[0]['moves'][1][1]}")
+    # get_metrics(grid, result[0]['moves'][1][0], result[0]['moves'][1][1])
+    # print(f"\nMove 3: {result[0]['moves'][2][0]} at {result[0]['moves'][2][1]}")
+    # get_metrics(grid, result[0]['moves'][2][0], result[0]['moves'][2][1])
+    start_time12 = time.time()
+    result12 = astar_solve(grid1, pieces_2d1)
+    end_time12 = time.time()
+    elapsed_time12 = end_time12 - start_time12
+
+    grid2 = [
+        [1, 1, 1, 0, 0, 0, 1, 1],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 1, 1, 1, 0, 1, 1],
+        [0, 0, 0, 0, 0, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 0],
+    ]
+    pieces2 = [
+        [(0,0), (1,1), (0,1), (0,2)],  #square
+        [(0,0), (1,2), (0,1), (0,2)],  #line
+        [(0,0), (1,2), (0,1), (0,2)],  #L shape
+    ]
+    pieces_2d2 = {
+        0: [
+            [1, 1, 1],
+            [0, 1, 0]
+        ],
+        1: [
+            [1, 1, 1],
+            [0, 0, 1],
         ],
         2: [
             [1, 1, 1],
             [0, 0, 1]
         ]
     }
+    start_time2 = time.time()
+    result2 = brute_force(grid2, pieces2)
+    end_time2 = time.time()
+    elapsed_time2 = end_time2 - start_time2
 
-    print(f"{find_fragmentation(grid)} fragments found in initial grid.")
-    
+    start_time22 = time.time()
+    result22 = astar_solve(grid2, pieces_2d2)
+    end_time22 = time.time()
+    elapsed_time22 = end_time22 - start_time22
 
-    print("\n===== Showing Move Options =====")
-    show_move_options(grid, pieces)
+    print("\n===== End of testing =====")
 
-    
-    print("\n===== Searching all states for best possible result =====")
-    print("Current best -> Lines cleared: 0, Space cleared: 0")
-    result = brute_force(grid, pieces)
+    print("\n~~~~~~~~~Grid1 test case results: ~~~~~~~~~")
+    print("\nBrute force: ")
     print(f"States checked: {result[1]}")
-    print(f"\nFinal Solution-> Lines cleared: {result[0]['lines_cleared']}, Spaces cleared: {result[0]['space_cleared']}")
-    moves_str = '\n  '.join(f"{i+1}. {piece} at {pos}" 
-                        for i, (piece, pos) in enumerate(result[0]['moves']))
-    print(f"\n{len(result[0]['moves'])} Moves made:\n  {moves_str}")
-    print("\nFinal grid state:")
-    print_matrix("rows   ", "columns", result[0]['grid'])
+    print(f"\nElapsed time: {elapsed_time1:.2f} seconds")
+    print("\nA* search: ")
+    print(f"States checked: {result12['states_explored']}")
+    print(f"\nElapsed time: {elapsed_time12:.2f} seconds")
 
-    print("\n===== Thinking about moves for best possible result =====")
-    print(f"\nMove 1: {result[0]['moves'][0][0]} at {result[0]['moves'][0][1]}")
-    get_metrics(grid, result[0]['moves'][0][0], result[0]['moves'][0][1])
-    print(f"\nMove 2: {result[0]['moves'][1][0]} at {result[0]['moves'][1][1]}")
-    get_metrics(grid, result[0]['moves'][1][0], result[0]['moves'][1][1])
-    print(f"\nMove 3: {result[0]['moves'][2][0]} at {result[0]['moves'][2][1]}")
-    get_metrics(grid, result[0]['moves'][2][0], result[0]['moves'][2][1])
+    print("\n~~~~~~~~~Grid2 test case results: ~~~~~~~~~")
+    print("\nBrute force: ")
+    print(f"States checked: {result2[1]}")
+    print(f"\nElapsed time: {elapsed_time2:.2f} seconds")
+    print("\nA* search: ")
+    print(f"States checked: {result22['states_explored']}")
+    print(f"\nElapsed time: {elapsed_time22:.2f} seconds")
+    # print("\n~~~~~~~~~Grid3 test case results: ~~~~~~~~~")
+    # print("\nBrute force: ")
+    # print(f"States checked: {result[1]}")
+    # print("\nA* search: ")
+    # print(f"States checked: {result12['states_explored']}")
+    # print("\n~~~~~~~~~Grid4 test case results: ~~~~~~~~~")
+    # print("\nBrute force: ")
+    # print(f"States checked: {result[1]}")
+    # print("\nA* search: ")
+    # print(f"States checked: {result12['states_explored']}")
+    # print("\n~~~~~~~~~Grid5 test case results: ~~~~~~~~~")
+    # print("\nBrute force: ")
+    # print(f"States checked: {result[1]}")
+    # print("\nA* search: ")
+    # print(f"States checked: {result12['states_explored']}")
 
-    astar_solve(grid, pieces_2d)
 
     print('\n this is only for testing. run program from main.py.\n')
 
