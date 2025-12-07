@@ -1,5 +1,7 @@
 # solve.py
 # implements ai search and decision-making
+# https://docs.python.org/3/library/heapq.html
+import heapq
 
 class BoardState:
     lines_cleared: int
@@ -33,7 +35,7 @@ def does_piece_fit(grid, piece, pos):
             return False
 
         #check for overlap
-        if grid[y][x] != 0:
+        if grid[y][x] > 0:
             return False
         
     return True
@@ -247,20 +249,20 @@ def brute_force_helper(grid, remaining_pieces, moves_so_far, total_lines, total_
 
 #=========================solve with AI evaluation=========================#
 def evaluate_board_state(grid, piece, where):
-    state = calc_board_metrics(grid, piece, where)
+    state, new_grid = calc_board_metrics(grid, piece, where)
 
     score = 0.0
     
     if state.is_full_clear:
         score += 10000.0
-    score += state.lines_cleared * 30.0
+    score += state.lines_cleared * 1000.0
     score += state.space_cleared * 2.0
     score += state.empty_space * 1.5
     score -= state.fragmentation * 5.0
     if state.is_game_over:
         score -= 1000000000000.0
 
-    return score
+    return (score, state, new_grid)
 
 #helper funcs for evaluation
 def calc_board_metrics(grid, piece, where):
@@ -277,7 +279,7 @@ def calc_board_metrics(grid, piece, where):
     state.is_full_clear = (state.empty_space == (rows * cols))
 
 
-    return state
+    return (state, new_grid)
 
 def count_empty_space(grid):
     rows = len(grid)
@@ -319,8 +321,7 @@ def find_fragmentation(grid):
     return regions
 
 def get_metrics(grid, piece, where):
-    state = calc_board_metrics(grid, piece, where)
-    score = evaluate_board_state(grid, piece, where)
+    score, state, new_grid = evaluate_board_state(grid, piece, where)
     
     print(f"Board State:")
     print(f"  Lines cleared: {state.lines_cleared}")
@@ -330,14 +331,102 @@ def get_metrics(grid, piece, where):
     print(f"  Full clear: {state.is_full_clear}")
     print(f"  Game over: {state.is_game_over}")
     print(f"  Eval score: {score:.2f}")
+    print("\nResulting Grid:")
+    print_matrix("rows   ", "columns", new_grid)
     
     return state, score
 
 
 #return best move found
-def search_best_move(grid, pieces) -> tuple:
-    pass
+#moves are tuples of (piece_index, y, x) -> use piece_index to match piece key
+def astar_solve(grid, pieces_2d):
+    pieces = convert_piece_format(pieces_2d)
 
+    init_state = {
+        'grid': tuple(tuple(row) for row in grid),
+        'pieces_left': tuple(range(len(pieces))),
+        'moves': (),
+        'lines': 0,
+        'spaces': 0,
+        'depth': 0
+    }
+    
+    prio_q = [(0, 0, init_state)]
+    visited = set()
+    state_counter = 1
+    states_explored = 0
+    
+    while prio_q:
+        prio, _, state = heapq.heappop(prio_q)
+        
+        grid_list = [list(row) for row in state['grid']]
+        
+        state_key = (state['grid'], state['pieces_left'])
+        if state_key in visited:
+            continue
+        visited.add(state_key)
+        
+        print(f"\n{'─'*70}")
+        print(f"Exploring state #{states_explored} (priority={prio:.2f})")
+        print(f"  Depth: {state['depth']}/3 pieces placed")
+        print(f"  Remaining pieces: {list(state['pieces_left'])}")
+        print(f"  Lines cleared so far: {state['lines']}")
+        print(f"  Spaces cleared so far: {state['spaces']}")
+        if state['moves']:
+            print(f"  Path so far: {list(state['moves'])}")
+
+        if len(state['pieces_left']) == 0:
+            print(f"Solution found! Explored {states_explored} states")
+            return {
+                'lines_cleared': state['lines'],
+                'space_cleared': state['spaces'],
+                'grid': grid_list,
+                'moves': list(state['moves']),
+                'states_explored': states_explored
+            }
+        
+        rows = len(grid_list)
+        cols = len(grid_list[0])
+        
+        for piece_idx in state['pieces_left']:
+            piece = pieces[piece_idx]
+            
+            for y in range(rows):
+                for x in range(cols):
+                    if grid_list[y][x] == 0 and does_piece_fit(grid_list, piece, (y, x)):
+                        
+                        states_explored += 1
+
+                        eval_score, metrics, cleaned_grid = evaluate_board_state(grid_list, piece, (y, x))
+                        print("  Current grid:")
+                        print_matrix("rows   ", "columns", cleaned_grid)
+
+                        lines_cleared = metrics.lines_cleared
+                        space_cleared = metrics.space_cleared
+                        
+                        new_remaining = tuple(i for i in state['pieces_left'] if i != piece_idx)
+
+                        cleaned_grid = clean_board(cleaned_grid)
+                        new_state = {
+                            'grid': tuple(tuple(row) for row in cleaned_grid),
+                            'pieces_left': new_remaining,
+                            'moves': state['moves'] + ((piece_idx, y, x),),
+                            'lines': state['lines'] + lines_cleared,
+                            'spaces': state['spaces'] + space_cleared,
+                            'depth': state['depth'] + 1
+                        }
+                        
+                        # A* priority calculation
+                        priority = (
+                            - eval_score                # Maximize board quality
+                            + new_state['depth'] * 10    # Minimize depth
+                        )
+                        
+                        heapq.heappush(prio_q, (priority, state_counter, new_state))
+                        state_counter += 1
+    
+    print(f"No solution found after {states_explored} states")
+    return None
 
 
 def main():
@@ -356,6 +445,22 @@ def main():
         [(0,0), (1,0), (2,0), (3,0)],  #line
         [(0,0), (0,1), (0,2), (1,2)],  #L shape
     ]
+    pieces_2d = {
+        0: [
+            [1, 1],
+            [1, 1]
+        ],
+        1: [
+            [1],
+            [1],
+            [1],
+            [1]
+        ],
+        2: [
+            [1, 1, 1],
+            [0, 0, 1]
+        ]
+    }
 
     print(f"{find_fragmentation(grid)} fragments found in initial grid.")
     
@@ -382,6 +487,8 @@ def main():
     get_metrics(grid, result[0]['moves'][1][0], result[0]['moves'][1][1])
     print(f"\nMove 3: {result[0]['moves'][2][0]} at {result[0]['moves'][2][1]}")
     get_metrics(grid, result[0]['moves'][2][0], result[0]['moves'][2][1])
+
+    astar_solve(grid, pieces_2d)
 
     print('\n this is only for testing. run program from main.py.\n')
 
