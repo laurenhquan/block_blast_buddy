@@ -1,24 +1,31 @@
 # How to Run Block Blast Buddy
 ## Prerequisites
 - Python 3.8+
-- Standard library
+- Uses only the Python standard library
 ## Run
 From the project directory:
 ```bash
 python main.py
 ```
+Make sure `main.py`, `grid.py`, and `solve.py` are all in the same folder so imports work correctly.
 
 # Files
 ## main.py
 ### Purpose
-- Handles the graphical user interface (GUI) using Tkinter and user interaction.
-- Acts as the controller/middle-man between the user and the AI logic.
+- Controls the graphical user interface (GUI) using Tkinter.
+- Handles all user input including grid/piece editing and submission.
+- Passes all grid/piece data to `solve.py`.
+- Displays solved grid and solution steps to user.
+- Depends on:
+    - `grid.py` for grid initialization and rendering
+    - `solve.py` for AI logic
 ## solve.py
 ### Purpose
-- Handles AI logic, specifically A* search algorithm
+- Implements A* search algorithm using an evaluation function.
+- Searches for the best placement, and order of placement, of pieces.
 ## grid.py
 ### Purpose
-- Handles the initialization of all grid objects
+- Defines the GridBlock class for rendering individual blocks on a Tkinter canvas.
 
 # Dependencies
 - `tkinter` for GUI
