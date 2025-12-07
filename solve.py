@@ -406,7 +406,7 @@ def astar_solve(grid, pieces_2d):
                         
                         new_remaining = tuple(i for i in state['pieces_left'] if i != piece_idx)
 
-                        cleaned_grid = clean_board(cleaned_grid)
+                        #cleaned_grid = clean_board(cleaned_grid)
                         new_state = {
                             'grid': tuple(tuple(row) for row in cleaned_grid),
                             'pieces_left': new_remaining,
