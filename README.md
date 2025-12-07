@@ -11,15 +11,13 @@ From the project directory:
 ### Purpose
 - Handles the graphical user interface (GUI) using Tkinter and user interaction.
 - Acts as the controller/middle-man between the user and the AI logic.
-### Dependencies
-- `tkinter` for GUI
-- `grid.py` for grid initialization
-- `solve.py` for A* search algorithm
 ## solve.py
 ### Purpose
 - Handles AI logic, specifically A* search algorithm
-### Dependencies
-- `heapq` for priority queue
 ## grid.py
 ### Purpose
 - Handles the initialization of all grid objects
+
+# Dependencies
+- `tkinter` for GUI
+- `heapq` for priority queue
