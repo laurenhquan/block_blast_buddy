@@ -72,12 +72,12 @@ def clear_full_lines(grid):
 
     #find full rows
     for r in range(rows):
-        if all(new_grid[r][c] != 0 for c in range(cols)):
+        if all(new_grid[r][c] > 0 for c in range(cols)):
             rows_to_clear.append(r)
             lines_cleared += 1
     #find full columns
     for c in range(cols):
-        if all(new_grid[r][c] != 0 for r in range(rows)):
+        if all(new_grid[r][c] > 0 for r in range(rows)):
             cols_to_clear.append(c)
             lines_cleared += 1
     #clear full rows
@@ -407,7 +407,7 @@ def astar_solve(grid, pieces_2d):
                         
                         new_remaining = tuple(i for i in state['pieces_left'] if i != piece_idx)
 
-                        cleaned_grid = clean_board(cleaned_grid)
+                        #cleaned_grid = clean_board(cleaned_grid)
                         new_state = {
                             'grid': tuple(tuple(row) for row in cleaned_grid),
                             'pieces_left': new_remaining,
