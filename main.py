@@ -2,7 +2,8 @@
 # controls program
 
 import tkinter as tk
-from grid import *
+from grid import GridBlock
+from solve import astar_solve
 
 # screen size
 SCREEN_WIDTH = 1280
@@ -14,7 +15,6 @@ GRID_COLS = 8
 
 # block size
 BLOCK_SIZE = 45
-# BLOCK_GAP = 1
 
 # grid size
 GRID_WIDTH = GRID_COLS * BLOCK_SIZE
@@ -23,7 +23,8 @@ GRID_HEIGHT = GRID_ROWS * BLOCK_SIZE
 # number of pieces
 PIECE_NUM = 3
 
-class Game:
+class Buddy:
+    # MARK: INPUT -------------------------------------------------------------------------------------------
     def __init__(self, root):
         # initialize window
         self.root = root
@@ -39,36 +40,16 @@ class Game:
         grid_label.pack()
 
         # load grid canvas
-        self.grid_canvas = tk.Canvas(grid_frame, width=GRID_WIDTH, height=GRID_HEIGHT, bg="white")
-        self.grid_canvas.pack()
+        grid_canvas = tk.Canvas(grid_frame, width=GRID_WIDTH, height=GRID_HEIGHT, bg="white")
+        grid_canvas.pack()
 
         # load grid
         self.grid_data = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
-        self.grid_blocks = []
-        self.create_grid()
+        grid_blocks = self.create_grid(grid_canvas, self.grid_data)
 
         # bind mouse controls
-        self.grid_canvas.bind("<Button-1>", lambda event: self.left_click(event, self.grid_data, self.grid_blocks, GRID_ROWS, GRID_COLS))
-        self.grid_canvas.bind("<Button-3>", lambda event: self.right_click(event, self.grid_data, self.grid_blocks, GRID_ROWS, GRID_COLS))
-        # ---------------------------------------------------------------------------------------------------
-
-        # MARK: GRID KEY ------------------------------------------------------------------------------------
-        key_frame = tk.Frame(grid_frame)
-        key_frame.pack()
-
-        # TODO: change label names
-        key_items = {
-            "Empty": "gray",
-            "Occupied": "blue",
-            "Placed": "red"
-        }
-
-        for i, (label, color) in enumerate(key_items.items()):
-            color_box = tk.Canvas(key_frame, width=BLOCK_SIZE/2, height=BLOCK_SIZE/2, bg=color)
-            color_box.grid(row=0, column=(i*2))
-
-            label_name = tk.Label(key_frame, text=label)
-            label_name.grid(row=0, column=(i*2 + 1))
+        grid_canvas.bind("<Button-1>", lambda event: self.left_click(event, self.grid_data, grid_blocks, GRID_ROWS, GRID_COLS))
+        grid_canvas.bind("<Button-3>", lambda event: self.right_click(event, self.grid_data, grid_blocks, GRID_ROWS, GRID_COLS))
         # ---------------------------------------------------------------------------------------------------
 
         # MARK: PIECES --------------------------------------------------------------------------------------
@@ -79,6 +60,9 @@ class Game:
         # label pieces
         piece_label = tk.Label(pieces_frame, text="Your Pieces", font=("Helvetica", 12, "bold", "underline"))
         piece_label.pack()
+
+        # declare empty list for pieces
+        self.pieces_data = {}
 
         # load pieces
         for i in range(PIECE_NUM):
@@ -91,23 +75,48 @@ class Game:
         submit_frame.pack(expand=True)
 
         # provide submit button
-        submit_btn = tk.Button(submit_frame, text="Generate moves")
-        # TODO: command=lambda: solve puzzle
-        # TODO: solve puzzle = change grid_data to show red blocks as solution
+        submit_btn = tk.Button(submit_frame, text="Generate moves", command=self.generate_solution)
         submit_btn.pack()
         # ---------------------------------------------------------------------------------------------------
 
-    def create_grid(self):
+    def create_grid(self, canvas, data):
+        blocks = []
+
         for row in range(GRID_ROWS):
             row_list = []
 
             for col in range(GRID_COLS):
                 x = col * (BLOCK_SIZE)
                 y = row * (BLOCK_SIZE)
-                block = GridBlock(self.grid_canvas, x, y, BLOCK_SIZE)
+                block = GridBlock(canvas, x, y, BLOCK_SIZE)
                 row_list.append(block)
 
-            self.grid_blocks.append(row_list)
+                value = data[row][col]
+                if value == 0:
+                    block.set_color("gray")
+                elif value == 1:
+                    block.set_color("blue")
+                elif value == 2:
+                    block.set_color("red")
+                elif value == -1:
+                    block.set_color("purple")
+
+            blocks.append(row_list)
+
+            # draw column labels
+            for col in range(GRID_COLS):
+                x = col * BLOCK_SIZE + BLOCK_SIZE / 2
+                y = 10
+                canvas.create_text(x, y, text=str(col+1))
+
+            # draw row labels
+            for row in range(GRID_ROWS):
+                x = 10
+                y = row * BLOCK_SIZE + BLOCK_SIZE / 2
+                canvas.create_text(x, y, text=str(row+1))
+
+
+        return blocks
 
     def load_pieces(self, piece_number, parent_frame):
         # initialize piece frame
@@ -139,7 +148,7 @@ class Game:
         piece_cols.grid(row=1, column=3)
 
         # submit piece rows, cols
-        piece_submit = tk.Button(piece_frame, text="Submit", command=lambda: self.create_piece(piece_canvas, piece_blocks, piece_rows_var.get(), piece_cols_var.get()))
+        piece_submit = tk.Button(piece_frame, text="Submit", command=lambda: self.create_piece(piece_canvas, piece_blocks, piece_rows_var.get(), piece_cols_var.get(), piece_number))
         piece_submit.grid(row=1, column=4)
 
         # load piece canvas
@@ -149,7 +158,7 @@ class Game:
         # initialize block list
         piece_blocks = []
     
-    def create_piece(self, canvas, blocks, rows, cols):
+    def create_piece(self, canvas, blocks, rows, cols, piece_number):
         # ignore invalid inputs
         if rows <= 0 or cols <= 0:
             return
@@ -170,6 +179,9 @@ class Game:
 
         piece_data = [[0 for _ in range(cols)] for _ in range(rows)]
 
+        # store piece
+        self.pieces_data[piece_number] = piece_data
+
         # bind mouse controls
         canvas.bind("<Button-1>", lambda event: self.left_click(event, piece_data, blocks, rows, cols))
         canvas.bind("<Button-3>", lambda event: self.right_click(event, piece_data, blocks, rows, cols))
@@ -189,10 +201,63 @@ class Game:
 
                 if block.isWithinBounds(x,y):
                     block.set_color(fill_color)
-                    data[row][col] = set_value # 1=occupied, 0=vacant
+                    data[row][col] = set_value # 1=occupied, 0=vacant, 2=placed
                     return
+    # -------------------------------------------------------------------------------------------------------
+    
+    # MARK: SOLUTION ----------------------------------------------------------------------------------------
+    def generate_solution(self):
+        solution_window = tk.Toplevel(self.root)
+        solution_window.title("Block Blast Buddy: Solved")
+
+        # MARK: SOLVED GRID ---------------------------------------------------------------------------------
+        # initialize solution grid frame
+        solution_grid_frame = tk.Frame(solution_window)
+        solution_grid_frame.pack(side="left", expand=True)
+
+        # label solution grid
+        solution_grid_label = tk.Label(solution_grid_frame, text="Your Solution", font=("Helvetica", 12, "bold", "underline"))
+        solution_grid_label.pack()
+
+        # load solution grid canvas
+        solution_grid_canvas = tk.Canvas(solution_grid_frame, width=GRID_WIDTH, height=GRID_HEIGHT, bg="white")
+        solution_grid_canvas.pack()
+
+        # load solution grid
+        self.solution = astar_solve(self.grid_data, self.pieces_data)
+        solution_grid_data = self.solution['grid']
+        self.create_grid(solution_grid_canvas, solution_grid_data)
+        # ---------------------------------------------------------------------------------------------------
+
+        # MARK: SOLVED STEPS --------------------------------------------------------------------------------
+        # initialize solution steps frame
+        solution_steps_frame = tk.Frame(solution_window)
+        solution_steps_frame.pack(side="right", expand=True)
+
+        # label solution steps
+        solution_steps_label = tk.Label(solution_steps_frame, text="Your Steps", font=("Helvetica", 12, "bold", "underline"))
+        solution_steps_label.pack()
+
+        # load solution steps text
+        solution_steps = tk.Text(solution_steps_frame, bg="white", wrap=tk.WORD)
+
+        # load solution steps
+        solution_steps.insert(tk.END, self.insert_solution_steps())
+        solution_steps.config(state=tk.DISABLED)
+        solution_steps.pack()
+        # ---------------------------------------------------------------------------------------------------
+
+    def insert_solution_steps(self):
+        steps = ""
+
+        solution_moves = self.solution['moves']
+        for i, (piece_index, y, x) in enumerate(solution_moves):
+            steps += f"Step {i+1}: Place Piece #{piece_index+1} at row {y+1}, column {x+1}.\n"
+
+        return steps
+    # -------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     root = tk.Tk()
-    game = Game(root)
+    buddy = Buddy(root)
     root.mainloop()
