@@ -9,6 +9,29 @@ python main.py
 ```
 Make sure `main.py`, `grid.py`, and `solve.py` are all in the same folder so imports work correctly.
 
+# How to Use Block Blast Buddy
+Follow these steps once the GUI opens:
+## 1. Set Up the Main Grid
+- Use your mouse to recreate your current Block Blast board.
+- Left-click to select a block space (blue).
+- Right-click to deselect a block space (gray).
+## 2. Define Your Pieces
+For each piece:
+- Enter the number of rows and columns needed to create the piece.
+- Click "Submit."
+    - A grid should appear to represent a canvas to recreate the piece, similar to the main grid.
+-  Left-click to mark which cells contain blocks (blue).
+-  Right-click to unmark the block (gray).
+## 3. Generate the Solution
+- Click "Generate moves" at the bottom of the GUI.
+    - A new window should appear to show the solved board with the steps to reach the solution.
+        - Red blocks represent the pieces the solution has placed.
+        - Purple blocks represent a row/column cleared.
+        - Blue blocks represent remaining blocks in the board.
+        - Gray blocks represent empty spaces on the board.
+## Alt. If No Solution Exists
+- A new window should appear to show a "Game Over" screen, meaning no valid solution was found.
+
 # Files
 ## main.py
 ### Purpose
