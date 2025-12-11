@@ -30,7 +30,7 @@ For each piece:
 - Purple blocks represent a row/column cleared.
 - Blue blocks represent remaining blocks in the board.
 - Gray blocks represent empty spaces on the board.
-## Alt. If No Solution Exists
+### If No Solution Exists
 - A new window should appear to show a "Game Over" screen, meaning no valid solution was found.
 
 # Files
