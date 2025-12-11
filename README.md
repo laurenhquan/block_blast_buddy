@@ -25,10 +25,11 @@ For each piece:
 ## 3. Generate the Solution
 - Click "Generate moves" at the bottom of the GUI.
     - A new window should appear to show the solved board with the steps to reach the solution.
-        - Red blocks represent the pieces the solution has placed.
-        - Purple blocks represent a row/column cleared.
-        - Blue blocks represent remaining blocks in the board.
-        - Gray blocks represent empty spaces on the board.
+### Key
+- Red blocks represent the pieces the solution has placed.
+- Purple blocks represent a row/column cleared.
+- Blue blocks represent remaining blocks in the board.
+- Gray blocks represent empty spaces on the board.
 ## Alt. If No Solution Exists
 - A new window should appear to show a "Game Over" screen, meaning no valid solution was found.
 
