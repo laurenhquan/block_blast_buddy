@@ -52,6 +52,10 @@ class Buddy:
         grid_canvas.bind("<Button-3>", lambda event: self.right_click(event, self.grid_data, grid_blocks, GRID_ROWS, GRID_COLS))
         # ---------------------------------------------------------------------------------------------------
 
+        # MARK: COLOR KEY -----------------------------------------------------------------------------------
+        self.display_color_key(grid_frame, show_solution_colors=False)
+        # ---------------------------------------------------------------------------------------------------
+
         # MARK: PIECES --------------------------------------------------------------------------------------
         # initiliaze piece frame
         pieces_frame = tk.Frame(self.root)
@@ -239,6 +243,10 @@ class Buddy:
         self.create_grid(solution_grid_canvas, solution_grid_data)
         # ---------------------------------------------------------------------------------------------------
 
+        # MARK: COLOR KEY -----------------------------------------------------------------------------------
+        self.display_color_key(solution_grid_frame, show_solution_colors=True)
+        # ---------------------------------------------------------------------------------------------------
+
         # MARK: SOLVED STEPS --------------------------------------------------------------------------------
         # initialize solution steps frame
         solution_steps_frame = tk.Frame(solution_window)
@@ -265,6 +273,30 @@ class Buddy:
             steps += f"Step {i+1}: Place Piece #{piece_index+1} at row {y+1}, column {x+1}.\n"
 
         return steps
+    
+    def display_color_key(self, parent_frame, show_solution_colors=False):
+        # initialize key frame
+        key_frame = tk.Frame(parent_frame)
+        key_frame.pack()
+
+        def add_color(color, label, col):
+            # create color block
+            color_canvas = tk.Canvas(key_frame, width=BLOCK_SIZE/2, height=BLOCK_SIZE/2)
+            color_canvas.grid(row=0, column=col)
+            color_canvas.create_rectangle(0, 0, BLOCK_SIZE/2, BLOCK_SIZE/2, fill=color, outline="black")
+
+            # label color block
+            color_label = tk.Label(key_frame, text=label)
+            color_label.grid(row=0, column=col+1)
+
+        # add main colors
+        add_color("gray", "Empty", 0)
+        add_color("blue", "Filled", 2)
+        
+        # add solution colors
+        if show_solution_colors:
+            add_color("red", "Solution-placed", 4)
+            add_color("purple", "Cleared", 6)
     # -------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
